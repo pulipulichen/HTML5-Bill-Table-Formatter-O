@@ -1,3 +1,5 @@
+/* global FileHelper, VueHelper, DownloadHelper, Vue */
+
 Vue.config.productionTip = false
 var app = new Vue({
   el: '#app',
@@ -10,6 +12,7 @@ var app = new Vue({
   },
   computed: {
     output: function () {
+      /*
       let header = '本期交易明細'
       let posHeader = this.input.indexOf(header)
       let output  = this.input.slice(posHeader + header.length).trim()
@@ -22,6 +25,31 @@ var app = new Vue({
         return ''
       }
       // 先取得頭跟尾
+      */
+      let items = []
+      
+      this.input.trim().split('\n20').forEach((part, i) => {
+        if (part.startsWith('20') === false) {
+          part = '20' + part
+        }
+        
+        let lines = part.split('\n')
+        
+        let item = {
+          date: lines[0],
+          type: lines[1],
+        }
+        
+        if (lines.length === 3) {
+          item.money = lines[2]
+        }
+        else {
+          item.account = lines[2]
+          item.money = lines[3]
+        }
+        
+        items.push(item)
+      })
       
       // -------------
       // 再來把它換成表格
@@ -29,94 +57,28 @@ var app = new Vue({
       let table = $(`<table border="1" cellpadding="0" cellspacing="0">
                         <thead>
                           <tr>
-                            <th>消費日</th>
-                            <th>入帳日</th>
-                            <th>說明</th>
-                            <th>地區</th>
-                            <th>兌換日</th>
-                            <th>原幣金額</th>
-                            <th>新台幣金額</th>
+                            <th>日期</th>
+                            <th>類型</th>
+                            <th>帳戶</th>
+                            <th>金額</th>
                           </tr>
                         </thead>
                         <tbody></tbody>
                      </table>`)
       let tbody = table.find('tbody')
-      output.split('\n').forEach((line) => {
-        line = line.trim()
+      items.forEach((item) => {
         let tr = $('<tr></tr>')
-        if (line.startsWith('1')) {
-          // 表示這是一般支付
-          
-          let dateFields = line.slice(0, 19).split(' ')
-          //$(`<td>${dateFields}</td>`).appendTo(tr)
-          
-          
-          let fieldShoppingDate = dateFields[0].trim()
-          //$(`<td>${fieldShoppingDate}</td>`).appendTo(tr)
-          let fieldChargeDate = dateFields[1].trim()
-          //$(`<td>${fieldShoppingDate}</td>`).appendTo(tr)
-          
-          // 再從尾巴找回來
-          let tabSpaces = '   '
-          let lastSpacesPos = line.lastIndexOf(tabSpaces)
-          let fieldNTDPrice = line.slice(lastSpacesPos).trim()
-          //$(`<td>${fieldNTDPrice}</td>`).appendTo(tr)
-          
-          let last2Line = line.slice(0, lastSpacesPos).trim()
-          let last2SpacesPos = last2Line.lastIndexOf(tabSpaces, lastSpacesPos - 1)
-          let fieldOriginalPrice = last2Line.slice(last2SpacesPos).trim()
-          //console.log([last2SpacesPos, lastSpacesPos])
-          //$(`<td>${fieldOriginalPrice}</td>`).appendTo(tr)
-          
-          let last3Line = last2Line.slice(0, last2SpacesPos).trim()
-          let last3SpacesPos = last3Line.lastIndexOf(tabSpaces, last2SpacesPos - 1)
-          let fieldCurrency = last3Line.slice(last3SpacesPos).trim()
-          //$(`<td>${fieldCurrency}</td>`).appendTo(tr)
-          
-          let last4Line = last3Line.slice(0, last3SpacesPos).trim()
-          //console.log(last4Line)
-          let last4SpacesPos = last4Line.lastIndexOf('  ')
-          //console.log(last4SpacesPos)
-          if (last4SpacesPos === -1 || last4SpacesPos < 30) {
-            last4SpacesPos = last4Line.lastIndexOf('　')
-            
-          }
-          let fieldLocation = last4Line.slice(last4SpacesPos).trim()
-          if (fieldLocation.endsWith('%') || fieldLocation.endsWith('扣')) {
-            fieldLocation = ''
-          }
-          //$(`<td>${fieldLocation}</td>`).appendTo(tr)
-          
-          if (last4SpacesPos === -1) {
-            last4SpacesPos = last3SpacesPos
-          }
-          let fieldTitle = line.slice(19, last4SpacesPos).trim()
-          while (fieldTitle.endsWith('　')) {
-            fieldTitle = fieldTitle.slice(0, fieldTitle.length - 1)
-          }
-          
-          if (fieldTitle.indexOf(' (自動分期 ') > 0 
-                  && fieldTitle.indexOf(')分') > 0) {
-            fieldTitle = fieldTitle.replace(' (自動分期 ', ' <br />(自動分期 ')
-            fieldTitle = fieldTitle.replace(')分', ')<br />分')
-          }
-          
-          $(`<td valign="top" class="shopping-date">${fieldShoppingDate}</td>`).appendTo(tr)
-          $(`<td valign="top" class="charge-date">${fieldChargeDate}</td>`).appendTo(tr)
-          $(`<td valign="top" class="description">${fieldTitle}</td>`).appendTo(tr)
-          $(`<td valign="top" class="location">${fieldLocation}</td>`).appendTo(tr)
-          $(`<td valign="top" class="currency">${fieldCurrency}</td>`).appendTo(tr)
-          $(`<td valign="top" class="original-price">${fieldOriginalPrice}</td>`).appendTo(tr)
-          $(`<td valign="top" class="ntd-price">${fieldNTDPrice}</td>`).appendTo(tr)
-        }
-        else if (line.startsWith('應付')) {
-          //console.log(line)
-          let td = tbody.find('td.description:last')
-          //console.log(td.length)
-          
-          td.html(td.html() + '<br />' + line.split('　').join('<br />'))
-        }
         
+        $(`<td valign="top" class="date">${item.date}</td>`).appendTo(tr)
+        $(`<td valign="top" class="type">${item.type}</td>`).appendTo(tr)
+        if (item.account) {
+          $(`<td valign="top" class="account">${item.account}</td>`).appendTo(tr)
+        }
+        else {
+          $(`<td valign="top" class="account"></td>`).appendTo(tr)
+        }
+        $(`<td valign="top" class="money">${item.money}</td>`).appendTo(tr)
+          
         if (tr.children().length > 0) {
           tr.appendTo(tbody)
         }
@@ -125,20 +87,7 @@ var app = new Vue({
       return table.prop('outerHTML')
     },
     outputTitle: function () {
-      let header = '\n  TWD         1'
-      let pos1 = this.input.indexOf(header) + header.length - 1
-      let pos2 = this.input.indexOf(' ', pos1)
-      if (pos1 === -1 || pos2 === -1) {
-        return ''
-      }
-      let title = this.input.slice(pos1, pos2).trim()
-      
-      let yearMingGou = parseInt(title.slice(0, 3), 10)
-      let year = yearMingGou + 1911
-      title = year + title.slice(3)
-      
-      title = title.split('/').join('')
-      title = '兆豐信用卡帳單' + title
+      let title = '王道銀行'
       return title
     }
   },
@@ -146,9 +95,7 @@ var app = new Vue({
     $(this.$refs.modal).find('.ui.dropdown').dropdown()
     
     // 載入檔案
-    //$.get('./data.txt', (data) => {
-    //  this.input = data
-    //})
+    //$.get('./data.txt', (data) => { this.input = data })
     
     FileHelper.initDropUpload((e) => {
       //console.log(e)
