@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+      Bill Table Formatter
+    </title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Vendors -->
+    <script src="vendors/jquery/jquery.3.3.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="vendors/semantic-ui/semantic.min.css">
+    <script src="vendors/semantic-ui/semantic.min.js"></script>
+    
+    <script src="vendors/vue/vue.js"></script>
+    
+    <script src="vendors/js-xlsx/shim.min.js"></script>
+    <script src="vendors/js-xlsx/xlsx.full.min.js"></script>
+    <script src="vendors/js-xlsx/Blob.js"></script>
+    <script src="vendors/js-xlsx/FileSaver.js"></script>
+    <script src="vendors/js-xlsx/xlsx-helper.js"></script>
+    
+    <!-- Helpers -->
+    <script src="helpers/DownloadHelper.js"></script>
+    <script src="helpers/UploadHelper.js"></script>
+    <script src="helpers/DateHelper.js"></script>
+    <script src="helpers/VueHelper.js"></script>
+    <script src="helpers/ClipboardHelper.js"></script>
+    
+    <link rel="stylesheet/less" type="text/css" href="helpers/FileHelper.less" />
+    <script src="helpers/FileHelper.js"></script>
+    
+    <!-- Style --->
+    
+    <link rel="stylesheet/less" type="text/css" href="styles.less" />
+    <script>
+      less = {
+        logLevel: 0,
+      }
+    </script>
+    <script src="vendors/less/less.min.js" ></script>
+    
+    <link rel="icon" type="image/png" href="icon.png" />
+  </head>
+  <body>
+    <div id="app"
+         ref="modal">
+      <form class="ui form">
+        <div class="ui grid">
+          <div class="six wide column">
+            <div class="two fields">
+              <div class="field">
+                <label>&nbsp;</label>
+                <input type="file" 
+                       accept=".txt,.dat"
+                       @change="upload" />
+                <button type="button"
+                        class="ui labeled icon fluid green button" 
+                        @click="triggerUpload">
+                  <i class="upload icon"></i>
+                  UPLOAD
+                </button>
+              </div>
+              <div class="field">
+                <label>&nbsp;</label>
+                <button type="button"
+                        class="ui labeled icon fluid button" 
+                        @click="reset">
+                  <i class="window close icon"></i>
+                  CLEAN
+                </button>
+              </div>
+            </div>
+              
+            <div class="field"> 
+              <textarea class="input" v-model="input" onfocus="this.select()"></textarea>
+            </div>
+          </div>
+          <div class="ten wide column">
+            
+            <div class="three fields">
+              <div class="eight wide field">
+                <label>&nbsp;</label>
+                <select name="fileType" v-model="fileType" @change="persist">
+                  <option value="ods">OpenDocument Spreadsheet (.ods)</option>
+                  <option value="csv">Comma-Separated Values (.csv)</option>
+                  <option value="html">HTML (.html)</option>
+                  <!-- <option value="txt">Plain Text (.txt)</option> -->
+                </select>
+              </div>
+              <div class="four wide field">
+                <label>&nbsp;</label>
+                <button type="button"
+                        class="ui labeled icon fluid green button" 
+                        @click="download">
+                  <i class="download icon"></i>
+                  DOWNLOAD
+                </button>
+              </div>
+              <div class="four wide field">
+                <label>&nbsp;</label>
+                <button type="button"
+                        class="ui labeled icon fluid green button" 
+                        @click="copy">
+                  <i class="copy icon"></i>
+                  COPY
+                </button>
+              </div>
+            </div>
+            <div class="field">
+              <label>
+                Filename
+              </label>
+              <input type="text" v-model="outputTitle" disabled="disabled" />
+            </div>
+            
+            <div v-html="output" class="output"></div>
+            
+          </div>
+        </div>
+        
+        
+      </form>
+    </div>
+    
+    <script src="scripts.js"></script>
+  </body>
+</html>

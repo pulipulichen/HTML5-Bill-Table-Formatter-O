@@ -1,0 +1,5 @@
+UploadHelper = {
+  
+}
+
+window.UploadHelper = UploadHelper

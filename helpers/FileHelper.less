@@ -1,0 +1,21 @@
+body > div.droplayer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  padding-top: calc(50vh - 3rem);
+  font-size: 6rem;
+  font-weight: bold;
+  text-align: center;
+  border: 3px dashed white;
+  color: white;
+  background-color: rgba(0,0,0,0.87);
+  user-select: none;
+  cursor: grab;
+  display: none;
+}
+
+body.dragover > div.droplayer {
+  display: block;
+}
